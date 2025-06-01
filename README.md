@@ -26,7 +26,7 @@ Currently supported orbital types:
 * Natural orbitals from CASSCF
 * Localized MOs
 
-## Installation
+Installation
 -------
 Install to Python site-packages:
 
