@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CubeView – Orbital Viewer</title>
+    <!-- 3Dmol.js -->
+    <script src="./js/3Dmol-min.js"></script>
+    <script src="./js/pako.min.js"></script>
+    <!-- External CSS -->
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <!-- Modified table structure -->
+    <div id="sidebar">
+        <p>Loading orbitals...</p>
+    </div>
+
+    <!-- Viewer Container -->
+    <div id="viewer-container">
+        <div id="info-box">Please select an orbital</div>
+        <!-- Isovalue Bar -->
+        <div class="settings-container">
+            <table>
+                <tr>
+                    <td>Show Atom Index</td>
+                    <td><input type="checkbox" id="show-atom-index" /></td>
+                </tr>
+                <tr>
+                <td><label for="isovalue">Isosurface Threshold: <span id="isovalue-label">0.05</span></label></td>
+                <td><input type="range" id="isovalue" min="0.01" max="0.2" step="0.01" value="0.05" /></td>
+                </tr>
+            </table>
+        </div>
+        <div id="error-message">Cube file not found</div>
+        <div id="loadingMask">Loading ...</div>
+        <div id="viewer"></div>
+    </div>
+
+    <script src="./js/app.js"></script>
+</body>
+
+</html>

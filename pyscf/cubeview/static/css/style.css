@@ -1,0 +1,124 @@
+/* 1. Ensure html and body both occupy the full viewport (width and height) */
+html, body {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  background: #fafafa;
+  font-family: "Roboto", sans-serif;
+}
+
+/* 2. Left sidebar and right rendering area use flex ratios */
+#sidebar {
+  flex: 1;
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+  padding: 1rem;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+#viewer-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.table-container {
+  max-height: calc(100% - 2rem);
+  overflow-y: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ddd;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background: #f5f5f5;
+  z-index: 1;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+  transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+tbody tr.selected {
+  background-color: #1976d2 !important;
+  color: white;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+#info-box {
+  margin: 1rem;
+  padding: 0.5rem 1rem;
+  background: #1976d2;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 1rem;
+  width: fit-content;
+  z-index: 10;
+}
+
+#error-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(244, 67, 54, 0.9);
+  color: #fff;
+  padding: 1rem 2rem;
+  border-radius: 6px;
+  font-size: 1.2rem;
+  text-align: center;
+  z-index: 10;
+  display: none;
+}
+
+#viewer {
+  flex-grow: 1;
+}
+
+#loadingMask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #555;
+  z-index: 9;
+  visibility: hidden;
+}
+
+.settings-container {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  width: auto;
+  min-width: 250px;
+  z-index: 10;
+  text-align: right;
+}
