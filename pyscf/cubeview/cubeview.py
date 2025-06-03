@@ -63,7 +63,7 @@ def gen_mo_list_json(mol, mo_coeff, mo_energy, mo_occ, irreps, ao_component=0, s
         }
         
         if ao_component>0:
-            ao_info = process_ao(mo_coeff[i-1], mol.ao_labels(), ao_component)
+            ao_info = process_ao(mo_coeff[:,i-1], mol.ao_labels(), ao_component)
             entry["ao_components"] = ao_info
         
         data.append(entry)
@@ -244,7 +244,7 @@ def viewer(mf, mo_coeff=None, mo_energy=None, mo_occ=None,irreps=None):
         return UHFCubeView(mf)
     elif isinstance(mf, scf.rhf.RHF):
         return RHFCubeView(mf)
-    elif isinstance(mf, mcscf.mc1step_symm.CASSCF):   # casscf
+    elif isinstance(mf, mcscf.mc1step.CASSCF):   # casscf
         return CASSCFCubeView(mf)
     else:
         raise ValueError(f"Unsupported method type: {type(mf)}.")
