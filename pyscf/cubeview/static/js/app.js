@@ -6,7 +6,7 @@ const viewer = $3Dmol.createViewer(
 
 async function loadMolecule() {
   try {
-    const response = await fetch("./mol.xyz");
+    const response = await fetch(`./mol.xyz?t=${Date.now()}`);
     if (!response.ok) throw new Error("Failed to load molecule structure");
     const xyzData = await response.text();
 
@@ -66,7 +66,7 @@ async function loadCube(spin, index) {
     const mask = document.getElementById("loadingMask");
     mask.style.visibility = "visible";
 
-    const response = await fetch(`./cubes/${fileName}`);
+    const response = await fetch(`./cubes/${fileName}?t=${Date.now()}`);
     if (!response.ok) {
       if (response.status === 404) {
         document.getElementById("error-message").textContent =
@@ -101,7 +101,7 @@ async function loadCube(spin, index) {
 
 async function loadOrbitalsJSON() {
   try {
-    const response = await fetch("orbitals.json");
+    const response = await fetch(`orbitals.json?t=${Date.now()}`);
     if (!response.ok) throw new Error("Failed to load orbitals.json");
     const data = await response.json();
 
