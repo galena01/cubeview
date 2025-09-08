@@ -20,6 +20,7 @@ DESCRIPTION  = 'PySCF extension module cubeview'
 SO_EXTENSIONS = {
 }
 DEPENDENCIES = ['pyscf', 'numpy']
+VERSION = "0.1.1"
 
 #######################################################################
 # Unless not working, nothing below needs to be changed.
@@ -30,20 +31,7 @@ from setuptools import setup, find_namespace_packages, Extension
 
 topdir = os.path.abspath(os.path.join(__file__, '..'))
 modules = find_namespace_packages(include=['pyscf.*'])
-def guess_version():
-    for module in modules:
-        module_path = os.path.join(topdir, *module.split('.'))
-        for version_file in ['__init__.py', '_version.py']:
-            version_file = os.path.join(module_path, version_file)
-            if os.path.exists(version_file):
-                with open(version_file, 'r') as f:
-                    for line in f.readlines():
-                        if line.startswith('__version__'):
-                            delim = '"' if '"' in line else "'"
-                            return line.split(delim)[1]
-    raise ValueError("Version string not found")
-if not metadata.get('VERSION', None):
-    VERSION = guess_version()
+
 
 pyscf_lib_dir = os.path.join(topdir, 'pyscf', 'lib')
 def make_ext(pkg_name, srcs,

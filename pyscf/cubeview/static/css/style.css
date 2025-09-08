@@ -9,7 +9,101 @@ html, body {
   font-family: "Roboto", sans-serif;
 }
 
-/* 2. Left sidebar and right rendering area use flex ratios */
+#top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background-color: #1976d2;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+#description {
+  font-size: 1rem;
+}
+
+#stats-button {
+  background-color: #fff;
+  color: #1976d2;
+  border: none;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+#stats-button:hover {
+  background-color: #e0e0e0;
+}
+
+/* 添加弹窗样式 */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 15px;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+}
+
+.modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.modal-table th,
+.modal-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.modal-table th {
+  background-color: #f2f2f2;
+}
+
+.modal-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
 #sidebar {
   flex: 1;
   border-right: 1px solid #ddd;
@@ -17,6 +111,7 @@ html, body {
   padding: 1rem;
   background: #ffffff;
   box-sizing: border-box;
+  margin-top: 40px; 
 }
 
 #viewer-container {
@@ -25,6 +120,7 @@ html, body {
   display: flex;
   flex-direction: column;
   background: #ffffff;
+  margin-top: 40px; 
 }
 
 .table-container {

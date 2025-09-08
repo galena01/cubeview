@@ -3,7 +3,7 @@ CubeView - PySCF-based Orbital Visualization Toolkit with 3Dmol.js Integration
 
 2025-05-31
 
-* Version 0.1
+* Version 0.1.1
 
 ![](https://raw.githubusercontent.com/galena01/cubeview/refs/heads/main/webpage.jpg)
 
@@ -26,7 +26,7 @@ Currently supported orbital types:
 * Natural orbitals from CASSCF
 * Localized MOs
 
-Installation
+## Installation
 -------
 Install to Python site-packages:
 

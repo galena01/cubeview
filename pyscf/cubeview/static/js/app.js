@@ -4,6 +4,9 @@ const viewer = $3Dmol.createViewer(
   { backgroundColor: "white" }
 );
 
+// Store orbital classification information
+const orbitalCategories = {};
+
 async function loadMolecule() {
   try {
     const response = await fetch(`./mol.xyz?t=${Date.now()}`);
@@ -99,6 +102,98 @@ async function loadCube(spin, index) {
   }
 }
 
+// Modify statistics function to read classification information directly from the table
+function generateStatistics() {
+  const categories = [];
+  const categoryElements = document.querySelectorAll('.category-display');
+  
+  categoryElements.forEach(element => {
+    categories.push(element.textContent);
+  });
+  
+  return categories;
+}
+
+// Modify the function to display statistics
+function showStatistics() {
+  // Get all orbitals marked as "Active"
+  const activeOrbitals = [];
+  const activeElements = document.querySelectorAll('.category-display');
+  
+  activeElements.forEach(element => {
+    if (element.textContent === 'Active') {
+      // Get orbital information
+      const row = element.closest('tr');
+      const orbitalData = JSON.parse(row.getAttribute('data-orbital'));
+      activeOrbitals.push({
+        irrep: orbitalData.irrep
+      });
+    }
+  });
+  
+  // Count Active orbitals
+  const activeCount = activeOrbitals.length;
+  
+  // Collect and sort Irreps
+  const irreps = [...new Set(activeOrbitals.map(o => o.irrep))].sort();
+  const irrepString = irreps.join(' ');
+  
+  // Create modal element
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.id = 'stats-modal';
+  
+  // Create modal content
+  const modalContent = document.createElement('div');
+  modalContent.className = 'modal-content';
+  
+  // Add close button
+  const closeBtn = document.createElement('span');
+  closeBtn.className = 'close';
+  closeBtn.innerHTML = '&times;';
+  closeBtn.onclick = function() {
+    document.body.removeChild(modal);
+  };
+  
+  // Add title
+  const title = document.createElement('h2');
+  title.textContent = 'Orbital Statistics';
+  
+  // Create content display
+  const contentDiv = document.createElement('div');
+  contentDiv.style.marginTop = '20px';
+  
+  // Add Active orbital count
+  const countPara = document.createElement('p');
+  countPara.innerHTML = `<strong>Active Orbital Count:</strong> ${activeCount}`;
+  countPara.style.marginBottom = '10px';
+  
+  // Add Irrep information
+  const irrepPara = document.createElement('p');
+  irrepPara.innerHTML = `<strong>Irreps:</strong> ${irrepString || 'None'}`;
+  
+  // Assemble modal
+  contentDiv.appendChild(countPara);
+  contentDiv.appendChild(irrepPara);
+  modalContent.appendChild(closeBtn);
+  modalContent.appendChild(title);
+  modalContent.appendChild(contentDiv);
+  modal.appendChild(modalContent);
+  
+  // Add to page
+  document.body.appendChild(modal);
+  
+  // Show modal
+  modal.style.display = 'block';
+  
+  // Click background to close modal
+  modal.onclick = function(event) {
+    if (event.target === modal) {
+      document.body.removeChild(modal);
+    }
+  };
+}
+
 async function loadOrbitalsJSON() {
   try {
     const response = await fetch(`orbitals.json?t=${Date.now()}`);
@@ -124,12 +219,18 @@ async function loadOrbitalsJSON() {
             <th>Occ</th>
             <th>Energy</th>
             ${data.length > 0 && 'ao_components' in data[0] ? '<th>AO Components</th>' : ''}
+            <th>Category</th>
           </tr>
         </thead>
         <tbody>
     `;
     data.forEach((orbital) => {
       const spinText = orbital.spin ? orbital.spin : "a/b";
+      // Create unique identifier for each orbital
+      const orbitalId = `${orbital.index}_${orbital.spin || 'ab'}`;
+      // Get stored classification or default to 1
+      const category = orbitalCategories[orbitalId] || "Inactive";
+      
       tableHTML += `
       <tr data-orbital='${JSON.stringify(orbital)}'>
         <td>${orbital.index}</td>
@@ -138,6 +239,7 @@ async function loadOrbitalsJSON() {
         <td>${parseFloat(orbital.occ).toFixed(4)}</td>
         <td>${parseFloat(orbital.energy).toFixed(4)}</td>
         ${'ao_components' in orbital ? `<td>${orbital.ao_components}</td>` : ''}
+        <td class="category-display" data-id="${orbitalId}" style="${category === 'Active' ? 'font-weight: bold; color: darkred;' : ''}">${category}</td>
       </tr>
       `;
     });
@@ -164,7 +266,54 @@ async function loadOrbitalsJSON() {
           spin.toLowerCase() === "a/b" ? "" : spin; 
         loadCube(spinType, idx);
 
+        // Synchronize category selector value
+        const orbitalId = `${orbitalData.index}_${orbitalData.spin || 'ab'}`;
+        const category = orbitalCategories[orbitalId] || "Inactive";
+        document.getElementById('category-selector').value = category;
       });
+    });
+
+    // Add category selection to existing settings area
+    const settingsContainer = document.querySelector('.settings-container table');
+    const categoryRow = document.createElement('tr');
+    categoryRow.innerHTML = `
+      <td><label for="category-selector">Category:</label></td>
+      <td>
+        <select id="category-selector">
+          <option value="Inactive" selected>Inactive</option>
+          <option value="Active">Active</option>
+        </select>
+      </td>
+    `;
+    settingsContainer.appendChild(categoryRow);
+
+    // Add category selection event listener
+    document.getElementById('category-selector').addEventListener('change', function() {
+      const selectedRow = document.querySelector('#sidebar table tbody tr.selected');
+      if (selectedRow) {
+        const orbitalData = JSON.parse(selectedRow.getAttribute('data-orbital'));
+        const orbitalId = `${orbitalData.index}_${orbitalData.spin || 'ab'}`;
+        const category = document.getElementById('category-selector').value;
+        
+        // Update stored classification information
+        orbitalCategories[orbitalId] = category;
+        
+        // Update table display
+        const categoryDisplay = selectedRow.querySelector('.category-display');
+        if (categoryDisplay) {
+          categoryDisplay.textContent = category;
+          // Update style based on category
+          if (category === 'Active') {
+            categoryDisplay.style.fontWeight = 'bold';
+            categoryDisplay.style.color = 'darkred';
+          } else {
+            categoryDisplay.style.fontWeight = 'normal';
+            categoryDisplay.style.color = '';
+          }
+        }
+        
+        console.log(`Orbital ${orbitalData.index} (${orbitalData.spin || 'ab'}) categorized as: ${category}`);
+      }
     });
   } catch (err) {
     document.getElementById("sidebar").innerHTML =
@@ -215,7 +364,13 @@ showAtomIndexCheckbox.addEventListener('change', function () {
   }
 });
 
-// Page load immediately calls
+// Add statistics button event listener
 document.addEventListener("DOMContentLoaded", () => {
   loadOrbitalsJSON();
+  
+  // Add statistics button event listener
+  const statsButton = document.getElementById('stats-button');
+  if (statsButton) {
+    statsButton.addEventListener('click', showStatistics);
+  }
 });
