@@ -1,6 +1,6 @@
 import tempfile
 from pyscf.tools import cubegen
-from pyscf import symm, scf, mcscf
+from pyscf import symm, scf, mcscf, gto
 from pyscf.gto.mole import tostring
 import os, sys, subprocess, shutil
 import json
@@ -70,7 +70,7 @@ def gen_mo_list_json(mol, mo_coeff, mo_energy, mo_occ, irreps, ao_component=0, s
 
     return data
 
-def gen_cube_file(mol, mo_coeff, fn, resolution=0.2, margin=5.0, ftmp="/dev/shm/tmp.cube"):
+def gen_cube_file(mol, mo_coeff, fn, resolution=0.3, margin=5.0, ftmp="/dev/shm/tmp.cube"):
     """Common method to generate cube files and compress them"""
     cubegen.orbital(mol, ftmp, mo_coeff, resolution=resolution, margin=margin)
     # Compress cube file and delete original file
@@ -80,11 +80,15 @@ def gen_cube_file(mol, mo_coeff, fn, resolution=0.2, margin=5.0, ftmp="/dev/shm/
     os.remove(ftmp)
 
 class CubeViewBase:
-    def __init__(self, mf, **kwargs):
+    def __init__(self, mf_or_mol, **kwargs):
         self._workdir = tempfile.TemporaryDirectory()
         self.workdir = self._workdir.name
         print(f"Temporary directory created at {self.workdir}")
-        self.mf = mf
+        # self.mf = mf
+        if isinstance(mf_or_mol, gto.MoleBase):
+            self.mol = mf_or_mol
+        else:
+            self.mf = mf_or_mol
         
     def prepare(self, **kwargs):
         '''Common preparation steps for all viewers'''
@@ -202,8 +206,9 @@ class CASSCFCubeView(RHFCubeView):
 
 class CustomCubeView(CubeViewBase):
     
-    def __init__(self, mf, mo_coeff=None, mo_energy=None, mo_occ=None, irreps=None):
-        super().__init__(mf)
+    def __init__(self, mol, mo_coeff=None, mo_energy=None, mo_occ=None, irreps=None):
+        super().__init__(mol)
+        
         self.mo_coeff = mo_coeff
         self.mo_energy = mo_energy
         self.mo_occ = mo_occ
@@ -216,14 +221,14 @@ class CustomCubeView(CubeViewBase):
         # Generate JSON file
         with open(f"{self.workdir}/orbitals.json", "w") as f:
             json.dump(
-                gen_mo_list_json(self.mf.mol, self.mo_coeff, self.mo_energy, self.mo_occ,
+                gen_mo_list_json(self.mol, self.mo_coeff, self.mo_energy, self.mo_occ,
                                  self.irreps, kwargs.get("ao_component", 0)),
                 f, indent=4
             )
 
         # Generate xyz file
         open(f"{self.workdir}/mol.xyz",'w').write(
-            tostring(self.mf.mol,format='xyz')
+            tostring(self.mol,format='xyz')
         )
 
         # Generate cube files
@@ -233,20 +238,20 @@ class CustomCubeView(CubeViewBase):
         for i in mo_list:
             print(f"Generating cube file for MO {i}")
             fn = f"{self.workdir}/cubes/{i}.cube.gz"
-            gen_cube_file(self.mf.mol, self.mo_coeff[:,i-1], fn)
+            gen_cube_file(self.mol, self.mo_coeff[:,i-1], fn)
 
-def viewer(mf, mo_coeff=None, mo_energy=None, mo_occ=None,irreps=None):
+def viewer(mf_or_mol, mo_coeff=None, mo_energy=None, mo_occ=None,irreps=None):
     '''cube view factory'''
-    if mo_coeff is not None:
-        return CustomCubeView(mf, mo_coeff=mo_coeff, mo_energy=mo_energy, mo_occ=mo_occ, irreps=irreps)
+    if isinstance(mf_or_mol, gto.MoleBase):
+        return CustomCubeView(mf_or_mol, mo_coeff=mo_coeff, mo_energy=mo_energy, mo_occ=mo_occ, irreps=irreps)
     
-    if isinstance(mf, scf.uhf.UHF):
-        return UHFCubeView(mf)
-    elif isinstance(mf, scf.rhf.RHF):
-        return RHFCubeView(mf)
-    elif isinstance(mf, mcscf.mc1step.CASSCF):   # casscf
-        return CASSCFCubeView(mf)
+    if isinstance(mf_or_mol, scf.uhf.UHF):
+        return UHFCubeView(mf_or_mol)
+    elif isinstance(mf_or_mol, scf.rhf.RHF):
+        return RHFCubeView(mf_or_mol)
+    elif isinstance(mf_or_mol, mcscf.mc1step.CASSCF):   # casscf
+        return CASSCFCubeView(mf_or_mol)
     else:
-        raise ValueError(f"Unsupported method type: {type(mf)}.")
+        raise ValueError(f"Unsupported method type: {type(mf_or_mol)}.")
 
 

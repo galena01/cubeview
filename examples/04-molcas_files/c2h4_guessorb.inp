@@ -1,0 +1,15 @@
+&GATEWAY
+Title = C2H4 molecule as an example for generating Molden file
+Coord
+6
+
+C     0.      0.      0.658 
+C     0.      0.     -0.658 
+H     0.      0.924   1.252 
+H     0.     -0.924   1.252 
+H     0.     -0.924  -1.252 
+H     0.      0.924  -1.252 
+Basis = 6-31G*
+Group = X Y Z
+
+&SEWARD
